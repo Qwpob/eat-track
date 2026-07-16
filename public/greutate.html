@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ro">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Eat Track — Greutate</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <meta name="theme-color" content="#0f172a" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Eat Track" />
+    <link rel="apple-touch-icon" href="icon.svg" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <span class="logo">⚖️</span>
+        <h1>Eat Track</h1>
+        <span id="engine-badge" class="badge" hidden></span>
+      </div>
+      <div class="date-picker">
+        <label for="date-input">Ziua</label>
+        <input id="date-input" type="date" />
+      </div>
+    </header>
+
+    <nav class="tabs">
+      <a class="tab" href="index.html">🍽️ Mese</a>
+      <a class="tab active" href="greutate.html">⚖️ Greutate</a>
+      <a class="tab" href="obiective.html">🎯 Obiective</a>
+    </nav>
+
+    <main>
+      <!-- Greutate azi -->
+      <section class="card">
+        <h2>⚖️ Greutate azi</h2>
+        <form id="weight-form" class="row">
+          <input id="weight-input" type="number" step="0.1" min="0" placeholder="kg" />
+          <button type="submit">Salvează</button>
+          <span id="weight-status" class="muted"></span>
+        </form>
+      </section>
+
+      <!-- Grafic greutate -->
+      <section class="card">
+        <div class="card-head">
+          <h2>📈 Evoluția greutății</h2>
+          <span id="weight-trend" class="muted"></span>
+        </div>
+        <canvas id="weight-chart" class="chart" width="720" height="260"></canvas>
+        <div id="weight-chart-empty" class="empty" hidden>
+          Adaugă greutatea în mai multe zile ca să vezi tendința.
+        </div>
+      </section>
+
+      <!-- Istoric greutate -->
+      <section class="card">
+        <h2>📜 Istoric greutate</h2>
+        <div id="weight-history" class="history"></div>
+      </section>
+    </main>
+
+    <script src="foods.js"></script>
+    <script src="parser.js"></script>
+    <script src="store.js"></script>
+    <script src="localapi.js"></script>
+    <script src="common.js"></script>
+    <script src="weight.js"></script>
+  </body>
+</html>

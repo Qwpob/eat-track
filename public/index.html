@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ro">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Eat Track — Mese</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <meta name="theme-color" content="#0f172a" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Eat Track" />
+    <link rel="apple-touch-icon" href="icon.svg" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <span class="logo">🍽️</span>
+        <h1>Eat Track</h1>
+        <span id="engine-badge" class="badge" hidden></span>
+      </div>
+      <div class="date-picker">
+        <label for="date-input">Ziua</label>
+        <input id="date-input" type="date" />
+      </div>
+    </header>
+
+    <nav class="tabs">
+      <a class="tab active" href="index.html">🍽️ Mese</a>
+      <a class="tab" href="greutate.html">⚖️ Greutate</a>
+      <a class="tab" href="obiective.html">🎯 Obiective</a>
+    </nav>
+
+    <main>
+      <!-- Progres obiectiv -->
+      <section class="card">
+        <h2>🎯 Progres spre obiectiv</h2>
+        <div id="progress" class="progress-grid"></div>
+      </section>
+
+      <!-- Adauga masa (chemat la cerere, nu permanent vizibil) -->
+      <section class="card" id="add-card" hidden>
+        <h2 id="add-title">🍴 Adaugă o masă</h2>
+        <p class="hint">
+          Scrie natural, ex:
+          <em>„azi am mâncat 200g salam, 100g cașcaval, 250g pâine și 2 ouă”</em>
+        </p>
+        <form id="meal-form">
+          <textarea
+            id="meal-input"
+            rows="2"
+            placeholder="200g salam, 100g cascaval, 250g paine..."
+          ></textarea>
+          <div class="row">
+            <button type="button" id="cancel-add" class="ghost">Anulează</button>
+            <button type="submit" id="submit-meal">Adaugă masa</button>
+          </div>
+        </form>
+        <div id="preview" class="preview" hidden></div>
+      </section>
+
+      <!-- Scaneaza eticheta (AI vision) -->
+      <section class="card" id="scan-card" hidden>
+        <h2>Scanează eticheta 📷</h2>
+        <p class="hint">
+          Fotografiază tabelul cu valori nutriționale de pe ambalaj; AI-ul
+          citește valorile per 100&nbsp;g.
+        </p>
+        <div class="row">
+          <input id="label-file" type="file" accept="image/*" capture="environment" />
+        </div>
+        <div id="scan-status" class="hint"></div>
+        <div id="scan-result" class="preview" hidden>
+          <div id="scan-values"></div>
+          <form id="scan-form" class="row">
+            <label>Grame <input id="scan-grams" type="number" min="1" value="100" /></label>
+            <button type="submit">Adaugă la mese</button>
+          </form>
+        </div>
+      </section>
+
+      <!-- Mesele zilei -->
+      <section class="card">
+        <h2>🍽️ Mesele zilei</h2>
+        <p class="hint">Apasă pe o masă pentru a o edita.</p>
+        <div id="meals-list" class="meals"></div>
+      </section>
+
+      <!-- Calendar -->
+      <section class="card">
+        <div class="card-head">
+          <h2>📅 Calendar</h2>
+          <div class="cal-nav">
+            <button type="button" id="cal-prev" class="ghost small">‹</button>
+            <span id="cal-title"></span>
+            <button type="button" id="cal-next" class="ghost small">›</button>
+          </div>
+        </div>
+        <div id="calendar" class="calendar"></div>
+      </section>
+    </main>
+
+    <script src="foods.js"></script>
+    <script src="parser.js"></script>
+    <script src="store.js"></script>
+    <script src="localapi.js"></script>
+    <script src="common.js"></script>
+    <script src="meals.js"></script>
+  </body>
+</html>
