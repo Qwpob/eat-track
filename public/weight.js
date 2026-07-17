@@ -181,14 +181,18 @@ async function loadHistory() {
 
 async function saveWeight(e) {
   e.preventDefault();
-  const weight = parseFloat($("#weight-input").value);
-  if (Number.isNaN(weight)) return;
+  const status = $("#weight-status");
+  const raw = $("#weight-input").value.trim().replace(",", ".");
+  const weight = parseFloat(raw);
+  if (Number.isNaN(weight) || weight <= 0) {
+    status.textContent = "Introdu o greutate validă";
+    return;
+  }
   await api("/api/weight", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ weight, date: state.date }),
   });
-  const status = $("#weight-status");
   status.textContent = "Salvat ✓";
   setTimeout(() => (status.textContent = ""), 1500);
   loadHistory();
