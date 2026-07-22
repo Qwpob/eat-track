@@ -65,7 +65,7 @@ function itemsTable(items, totals) {
   if (!items || !items.length) {
     return '<div class="empty">Niciun aliment recunoscut.</div>';
   }
-  const srcLabels = { openfoodfacts: "online", online: "online", llm: "AI", vision: "foto" };
+  const srcLabels = { openfoodfacts: "online", online: "online", llm: "AI", vision: "foto", barcode: "cod" };
   const rows = items
     .map((it) => {
       const src = it.source
@@ -454,6 +454,148 @@ async function addScanItem(e) {
   loadHistory();
 }
 
+// ---- Scanare cod de bare ---------------------------------------------
+let bcProduct = null;
+let bcStream = null;
+let bcDetector = null;
+let bcRAF = null;
+
+function bcSupportsCamera() {
+  return (
+    "BarcodeDetector" in window &&
+    navigator.mediaDevices &&
+    typeof navigator.mediaDevices.getUserMedia === "function"
+  );
+}
+
+async function startBarcodeScan() {
+  const status = $("#bc-status");
+  if (!bcSupportsCamera()) {
+    status.textContent = "Camera nu e disponibilă aici. Scrie codul manual mai jos.";
+    return;
+  }
+  try {
+    if (!bcDetector) {
+      bcDetector = new BarcodeDetector({
+        formats: ["ean_13", "ean_8", "upc_a", "upc_e", "code_128"],
+      });
+    }
+    bcStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: "environment" },
+    });
+    const video = $("#bc-video");
+    video.srcObject = bcStream;
+    video.hidden = false;
+    $("#bc-start").hidden = true;
+    $("#bc-stop").hidden = false;
+    status.textContent = "Caut codul de bare…";
+    await video.play();
+    scanLoop();
+  } catch (err) {
+    status.textContent =
+      "Nu am putut porni camera. Verifică permisiunile sau scrie codul manual.";
+    stopBarcodeScan();
+  }
+}
+
+async function scanLoop() {
+  const video = $("#bc-video");
+  if (!bcStream || !video || video.readyState < 2) {
+    bcRAF = requestAnimationFrame(scanLoop);
+    return;
+  }
+  try {
+    const codes = await bcDetector.detect(video);
+    if (codes && codes.length) {
+      const code = codes[0].rawValue;
+      stopBarcodeScan();
+      await lookupBarcode(code);
+      return;
+    }
+  } catch (e) {
+    // ignore per-frame decode errors and keep scanning
+  }
+  bcRAF = requestAnimationFrame(scanLoop);
+}
+
+function stopBarcodeScan() {
+  if (bcRAF) cancelAnimationFrame(bcRAF);
+  bcRAF = null;
+  if (bcStream) {
+    bcStream.getTracks().forEach((t) => t.stop());
+    bcStream = null;
+  }
+  const video = $("#bc-video");
+  if (video) {
+    video.srcObject = null;
+    video.hidden = true;
+  }
+  $("#bc-start").hidden = false;
+  $("#bc-stop").hidden = true;
+}
+
+async function lookupBarcode(code) {
+  const status = $("#bc-status");
+  const clean = String(code || "").replace(/\D/g, "");
+  if (!clean) {
+    status.textContent = "Scrie un cod de bare valid.";
+    return;
+  }
+  status.textContent = `Caut produsul (${clean})…`;
+  $("#bc-result").hidden = true;
+  try {
+    const res = await api(`/api/barcode?code=${encodeURIComponent(clean)}`);
+    if (res.error) {
+      status.textContent =
+        "Produsul nu a fost găsit în baza de date. Încearcă alt cod sau adaugă-l manual.";
+      return;
+    }
+    status.textContent = "";
+    renderBarcode(res);
+  } catch (e) {
+    status.textContent = "Eroare la căutare. Verifică conexiunea la internet.";
+  }
+}
+
+function renderBarcode(res) {
+  bcProduct = res;
+  const rows = MACROS.map(
+    (m) => `${m.label}: <b>${fmt(res[m.key])}</b> ${m.unit}`
+  ).join(" · ");
+  $("#bc-values").innerHTML = `
+    <label class="scan-name">Produs
+      <input id="bc-name" type="text" value="${escapeHtml(
+        res.name || ""
+      )}" placeholder="Nume produs" />
+    </label>
+    <div class="hint">Valori / 100 g: ${rows}</div>`;
+  $("#bc-result").hidden = false;
+}
+
+async function addBarcodeItem(e) {
+  e.preventDefault();
+  if (!bcProduct) return;
+  const name = ($("#bc-name").value || "").trim() || bcProduct.name || "produs";
+  const grams = parseFloat($("#bc-grams").value) || 0;
+  if (grams <= 0) return;
+  const per_100g = {};
+  MACROS.forEach((m) => (per_100g[m.key] = bcProduct[m.key]));
+  const res = await api("/api/meals/item", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ date: state.date, name, grams, per_100g, source: "barcode" }),
+  });
+  if (res.error) return;
+  bcProduct = null;
+  $("#bc-result").hidden = true;
+  $("#bc-code").value = "";
+  $("#bc-status").textContent = "";
+  const day = res.day;
+  renderProgress(day.totals, day.goals);
+  renderMeals(day.meals);
+  loadHistory();
+}
+
 async function init() {
   const cfg = await initCommon(loadDay);
   $("#meal-form").addEventListener("submit", submitMeal);
@@ -466,6 +608,17 @@ async function init() {
     $("#label-file").addEventListener("change", scanFile);
     $("#scan-form").addEventListener("submit", addScanItem);
   }
+  $("#bc-start").addEventListener("click", startBarcodeScan);
+  $("#bc-stop").addEventListener("click", stopBarcodeScan);
+  $("#bc-search").addEventListener("click", () => lookupBarcode($("#bc-code").value));
+  $("#bc-code").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      lookupBarcode($("#bc-code").value);
+    }
+  });
+  $("#bc-form").addEventListener("submit", addBarcodeItem);
+  if (!bcSupportsCamera()) $("#bc-start").hidden = true;
   loadDay();
 }
 

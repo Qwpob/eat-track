@@ -188,8 +188,18 @@ textarea {
   margin-top: 4px;
 }
 
-#scan-grams {
+#scan-grams,
+#bc-grams {
   width: 90px;
+}
+
+.scanner-video {
+  width: 100%;
+  max-height: 260px;
+  margin-top: 10px;
+  border-radius: 12px;
+  background: #000;
+  object-fit: cover;
 }
 
 button {

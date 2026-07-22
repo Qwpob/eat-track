@@ -11,7 +11,9 @@
 const ONLINE_LOOKUP = true;
 
 const _OFF_URL = "https://ro.openfoodfacts.org/cgi/search.pl";
+const _OFF_PRODUCT_URL = "https://world.openfoodfacts.org/api/v2/product";
 const _offCache = {};
+const _barcodeCache = {};
 
 function _localToday() {
   const d = new Date();
@@ -99,6 +101,38 @@ async function offLookup(name) {
   return result;
 }
 
+// Look a product up by its barcode (EAN/UPC) directly on OpenFoodFacts.
+// Returns macros per 100 g + a display name, or null when not found / offline.
+async function offLookupBarcode(code) {
+  const barcode = String(code || "").replace(/\D/g, "");
+  if (!barcode || !ONLINE_LOOKUP) return null;
+  if (barcode in _barcodeCache) return _barcodeCache[barcode];
+
+  let result = null;
+  try {
+    const url = `${_OFF_PRODUCT_URL}/${barcode}.json?fields=product_name,product_name_ro,brands,nutriments`;
+    const resp = await fetch(url);
+    if (resp.ok) {
+      const data = await resp.json();
+      if (data.status === 1 && data.product) {
+        const macros = _extractOff(data.product);
+        if (macros) {
+          const p = data.product;
+          const display = (p.product_name_ro || p.product_name || "").trim();
+          const brand = (p.brands || "").split(",")[0].trim();
+          const name = (display || brand || `produs ${barcode}`).slice(0, 60);
+          result = { ...macros, name, barcode, source: "barcode" };
+        }
+      }
+    }
+  } catch (e) {
+    result = null; // offline or blocked
+  }
+
+  _barcodeCache[barcode] = result;
+  return result;
+}
+
 async function parseText(text) {
   const resolver = ONLINE_LOOKUP ? offLookup : null;
   const result = await parseMeal(text, resolver);
@@ -124,6 +158,10 @@ async function api(path, opts) {
     }
     if (p === "/api/history") {
       return Store.getHistory(parseInt(qs.get("limit") || "30", 10));
+    }
+    if (p === "/api/barcode") {
+      const product = await offLookupBarcode(qs.get("code") || "");
+      return product || { error: "not found" };
     }
     if (p === "/api/goals") {
       return Store.getGoals();

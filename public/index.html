@@ -79,6 +79,37 @@
         </div>
       </section>
 
+      <!-- Scaneaza cod de bare -->
+      <section class="card" id="barcode-card">
+        <h2>Scanează cod de bare 📷</h2>
+        <p class="hint">
+          Îndreaptă camera spre codul de bare al produsului; îl caut automat în
+          baza de date OpenFoodFacts.
+        </p>
+        <div class="row">
+          <button type="button" id="bc-start">📷 Pornește camera</button>
+          <button type="button" id="bc-stop" class="ghost" hidden>Oprește</button>
+        </div>
+        <video id="bc-video" class="scanner-video" playsinline muted hidden></video>
+        <div class="row" id="bc-manual">
+          <input
+            id="bc-code"
+            type="text"
+            inputmode="numeric"
+            placeholder="sau scrie codul (ex: 5941…)"
+          />
+          <button type="button" id="bc-search" class="ghost">Caută</button>
+        </div>
+        <div id="bc-status" class="hint"></div>
+        <div id="bc-result" class="preview" hidden>
+          <div id="bc-values"></div>
+          <form id="bc-form" class="row">
+            <label>Grame <input id="bc-grams" type="number" min="1" value="100" /></label>
+            <button type="submit">Adaugă la mese</button>
+          </form>
+        </div>
+      </section>
+
       <!-- Mesele zilei -->
       <section class="card">
         <h2>🍽️ Mesele zilei</h2>
