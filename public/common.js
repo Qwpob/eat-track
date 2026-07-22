@@ -55,5 +55,24 @@ async function initCommon(onDateChange) {
       onDateChange();
     });
   }
+
+  const menuBtn = $("#menu-toggle");
+  const tabs = $("#main-tabs");
+  if (menuBtn && tabs) {
+    const setOpen = (open) => {
+      if (open) tabs.removeAttribute("hidden");
+      else tabs.setAttribute("hidden", "");
+      menuBtn.classList.toggle("open", open);
+      menuBtn.setAttribute("aria-expanded", open ? "true" : "false");
+    };
+    menuBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      setOpen(tabs.hasAttribute("hidden"));
+    });
+    document.addEventListener("click", (e) => {
+      if (tabs.hasAttribute("hidden")) return;
+      if (!tabs.contains(e.target) && !menuBtn.contains(e.target)) setOpen(false);
+    });
+  }
   return cfg;
 }

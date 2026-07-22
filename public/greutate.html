@@ -19,17 +19,20 @@
         <h1>Eat Track</h1>
         <span id="engine-badge" class="badge" hidden></span>
       </div>
-      <div class="date-picker">
-        <label for="date-input">Ziua</label>
-        <input id="date-input" type="date" />
-      </div>
+      <button id="menu-toggle" class="menu-btn" type="button" aria-label="Meniu" aria-expanded="false" aria-controls="main-tabs">
+        <span></span><span></span><span></span>
+      </button>
     </header>
 
-    <nav class="tabs">
+    <nav class="tabs" id="main-tabs" hidden>
       <a class="tab" href="index.html">🍽️ Mese</a>
       <a class="tab active" href="greutate.html">⚖️ Greutate</a>
       <a class="tab" href="obiective.html">🎯 Obiective</a>
       <a class="tab" href="alimente.html">🥫 Alimente</a>
+      <div class="date-picker menu-date">
+        <label for="date-input">Ziua</label>
+        <input id="date-input" type="date" />
+      </div>
     </nav>
 
     <main>
