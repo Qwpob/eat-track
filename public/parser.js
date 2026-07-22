@@ -47,6 +47,42 @@ for (const orig of Object.keys(FOODS)) {
   if (!(k in _NORM_TO_ORIG)) _NORM_TO_ORIG[k] = orig;
 }
 
+// Snapshot of the built-in database, so user-added foods can be layered on
+// top (and cleanly removed) without losing the defaults.
+const _BASE_FOODS = { ...FOODS };
+
+// Rebuild the lookup indexes from the current FOODS object. Called after the
+// custom food list changes.
+function rebuildFoodIndex() {
+  const keys = Object.keys(FOODS).map(_norm).sort((a, b) => b.length - a.length);
+  _FOOD_KEYS.length = 0;
+  _FOOD_KEYS.push(...keys);
+  for (const k of Object.keys(_NORM_TO_ORIG)) delete _NORM_TO_ORIG[k];
+  for (const orig of Object.keys(FOODS)) {
+    const k = _norm(orig);
+    if (!(k in _NORM_TO_ORIG)) _NORM_TO_ORIG[k] = orig;
+  }
+}
+
+// Reset FOODS to the built-in defaults and layer the user's custom foods on
+// top (per-100 g macros), then rebuild the indexes so the parser matches them.
+function applyCustomFoods(list) {
+  for (const k of Object.keys(FOODS)) delete FOODS[k];
+  Object.assign(FOODS, _BASE_FOODS);
+  (list || []).forEach((f) => {
+    const name = String((f && f.name) || "").trim();
+    if (!name) return;
+    FOODS[name] = [
+      Number(f.calories) || 0,
+      Number(f.protein) || 0,
+      Number(f.carbs) || 0,
+      Number(f.fat) || 0,
+      Number(f.fiber) || 0,
+    ];
+  });
+  rebuildFoodIndex();
+}
+
 function _escapeRe(s) {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }

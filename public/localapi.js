@@ -163,6 +163,15 @@ async function api(path, opts) {
       const product = await offLookupBarcode(qs.get("code") || "");
       return product || { error: "not found" };
     }
+    if (p === "/api/foods") {
+      return { foods: Store.getCustomFoods() };
+    }
+    if (p === "/api/suggestions") {
+      return {
+        custom: Store.getCustomFoods().map((f) => f.name),
+        frequent: Store.getFrequentFoods(8),
+      };
+    }
     if (p === "/api/goals") {
       return Store.getGoals();
     }
@@ -213,6 +222,22 @@ async function api(path, opts) {
       const weight = Store.setWeight(date, body.weight);
       return { weight, day: Store.getDay(date) };
     }
+    if (p === "/api/foods") {
+      const name = (body.name || "").trim();
+      if (!name) return { error: "invalid food" };
+      const cal = parseFloat(body.calories);
+      if (Number.isNaN(cal)) return { error: "invalid food" };
+      Store.addCustomFood({
+        name,
+        calories: cal,
+        protein: parseFloat(body.protein) || 0,
+        carbs: parseFloat(body.carbs) || 0,
+        fat: parseFloat(body.fat) || 0,
+        fiber: parseFloat(body.fiber) || 0,
+      });
+      applyCustomFoods(Store.getCustomFoods());
+      return { foods: Store.getCustomFoods() };
+    }
     if (p === "/api/goals") {
       return Store.setGoals(body);
     }
@@ -224,5 +249,18 @@ async function api(path, opts) {
     return { ok, day: Store.getDay(date) };
   }
 
+  if (method === "DELETE" && p === "/api/foods") {
+    const ok = Store.deleteCustomFood(qs.get("name") || "");
+    applyCustomFoods(Store.getCustomFoods());
+    return { ok, foods: Store.getCustomFoods() };
+  }
+
   return { error: "not found" };
+}
+
+// Layer any previously saved custom foods into the parser database at startup.
+try {
+  applyCustomFoods(Store.getCustomFoods());
+} catch (e) {
+  /* Store not ready — ignore */
 }

@@ -312,6 +312,59 @@ function scheduleLivePreview() {
 // ---- Add / edit meal form (summoned on demand) ------------------------
 let editingId = null;
 
+// Quick-add chips: the user's own products + foods they log often.
+async function renderSuggestions() {
+  const box = $("#meal-suggestions");
+  if (!box) return;
+  let data;
+  try {
+    data = await api("/api/suggestions");
+  } catch (e) {
+    box.hidden = true;
+    return;
+  }
+  const groups = [];
+  const custom = data.custom || [];
+  if (custom.length) groups.push({ label: "🥫 Produsele mele", items: custom });
+  const seen = new Set(custom);
+  const freq = (data.frequent || []).filter((n) => !seen.has(n));
+  if (freq.length) groups.push({ label: "⭐ Recomandate", items: freq });
+
+  if (!groups.length) {
+    box.innerHTML = "";
+    box.hidden = true;
+    return;
+  }
+  box.hidden = false;
+  box.innerHTML = groups
+    .map(
+      (g) => `<div class="sugg-group">
+        <span class="sugg-label">${g.label}</span>
+        <div class="sugg-chips">${g.items
+          .map(
+            (n) =>
+              `<button type="button" class="chip" data-food="${escapeHtml(
+                n
+              )}">${escapeHtml(n)}</button>`
+          )
+          .join("")}</div>
+      </div>`
+    )
+    .join("");
+  box.querySelectorAll(".chip").forEach((btn) => {
+    btn.addEventListener("click", () => addFoodToInput(btn.dataset.food));
+  });
+}
+
+function addFoodToInput(name) {
+  const input = $("#meal-input");
+  const cur = input.value.trim();
+  const snippet = `100g ${name}`;
+  input.value = cur ? `${cur}, ${snippet}` : snippet;
+  input.focus();
+  scheduleLivePreview();
+}
+
 function openAddForm(meal) {
   const card = $("#add-card");
   card.hidden = false;
@@ -320,6 +373,7 @@ function openAddForm(meal) {
   $("#add-title").textContent = meal ? "✏️ Editează masa" : "🍴 Adaugă o masă";
   $("#submit-meal").textContent = meal ? "Salvează" : "Adaugă masa";
   $("#preview").hidden = true;
+  renderSuggestions();
   card.scrollIntoView({ behavior: "smooth", block: "start" });
   $("#meal-input").focus();
   if (meal) scheduleLivePreview();

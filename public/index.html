@@ -2,7 +2,7 @@
 <html lang="ro">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>Eat Track — Mese</title>
     <link rel="stylesheet" href="styles.css" />
     <link rel="manifest" href="manifest.webmanifest" />
@@ -29,6 +29,7 @@
       <a class="tab active" href="index.html">🍽️ Mese</a>
       <a class="tab" href="greutate.html">⚖️ Greutate</a>
       <a class="tab" href="obiective.html">🎯 Obiective</a>
+      <a class="tab" href="alimente.html">🥫 Alimente</a>
     </nav>
 
     <main>
@@ -51,6 +52,7 @@
             rows="2"
             placeholder="200g salam, 100g cascaval, 250g paine..."
           ></textarea>
+          <div id="meal-suggestions" class="suggestions" hidden></div>
           <div class="row">
             <button type="button" id="cancel-add" class="ghost">Anulează</button>
             <button type="submit" id="submit-meal">Adaugă masa</button>

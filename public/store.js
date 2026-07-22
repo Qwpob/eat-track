@@ -155,4 +155,61 @@ const Store = {
     });
     return { goals: data.goals, days };
   },
+
+  getCustomFoods() {
+    const data = _load();
+    return Array.isArray(data.customFoods) ? data.customFoods : [];
+  },
+
+  getFrequentFoods(limit) {
+    const data = _load();
+    const counts = {};
+    for (const date of Object.keys(data.days)) {
+      for (const meal of data.days[date].meals || []) {
+        for (const it of meal.items || []) {
+          const name = (it.food || "").trim();
+          if (name) counts[name] = (counts[name] || 0) + 1;
+        }
+      }
+    }
+    return Object.keys(counts)
+      .sort((a, b) => counts[b] - counts[a])
+      .slice(0, limit || 8);
+  },
+
+  addCustomFood(food) {
+    const name = String((food && food.name) || "").trim();
+    if (!name) return null;
+    const data = _load();
+    if (!Array.isArray(data.customFoods)) data.customFoods = [];
+    const entry = {
+      name,
+      calories: round1(food.calories),
+      protein: round1(food.protein),
+      carbs: round1(food.carbs),
+      fat: round1(food.fat),
+      fiber: round1(food.fiber),
+    };
+    const idx = data.customFoods.findIndex(
+      (f) => f.name.toLowerCase() === name.toLowerCase()
+    );
+    if (idx >= 0) data.customFoods[idx] = entry;
+    else data.customFoods.push(entry);
+    data.customFoods.sort((a, b) => a.name.localeCompare(b.name, "ro"));
+    _save(data);
+    return entry;
+  },
+
+  deleteCustomFood(name) {
+    const key = String(name || "").toLowerCase();
+    const data = _load();
+    if (!Array.isArray(data.customFoods)) return false;
+    const before = data.customFoods.length;
+    data.customFoods = data.customFoods.filter(
+      (f) => f.name.toLowerCase() !== key
+    );
+    const changed = data.customFoods.length !== before;
+    if (changed) _save(data);
+    return changed;
+  },
 };
