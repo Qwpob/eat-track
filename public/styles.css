@@ -61,18 +61,24 @@ body {
 .brand {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   flex: 1 1 auto;
   min-width: 0;
 }
 
 .brand h1 {
-  font-size: 1.25rem;
+  font-size: 1.7rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
   margin: 0;
 }
 
 .logo {
-  font-size: 1.6rem;
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  display: block;
+  flex: 0 0 auto;
 }
 
 .badge {

@@ -40,13 +40,6 @@ async function initCommon(onDateChange) {
   const cfg = await api("/api/config");
   state.date = cfg.today;
 
-  const badge = $("#engine-badge");
-  if (badge) {
-    badge.hidden = false;
-    const labels = { llm: "AI", online: "online", local: "local" };
-    badge.textContent = labels[cfg.engine] || cfg.engine;
-  }
-
   const dateInput = $("#date-input");
   if (dateInput) {
     dateInput.value = state.date;

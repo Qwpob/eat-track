@@ -1,13 +1,42 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <rect width="512" height="512" rx="96" fill="#0f172a"/>
-  <circle cx="256" cy="256" r="150" fill="none" stroke="#4ade80" stroke-width="22"/>
-  <circle cx="256" cy="256" r="96" fill="none" stroke="#4ade80" stroke-width="14" opacity="0.6"/>
-  <g fill="#4ade80">
-    <rect x="150" y="150" width="14" height="120" rx="7"/>
-    <rect x="176" y="150" width="14" height="120" rx="7"/>
-    <rect x="202" y="150" width="14" height="120" rx="7"/>
-    <rect x="150" y="256" width="66" height="16" rx="8"/>
-    <rect x="176" y="150" width="14" height="212" rx="7"/>
-    <path d="M330 150c-26 0-40 26-40 66 0 30 12 48 30 54v92a10 10 0 0 0 20 0V150z"/>
+  <ellipse cx="256" cy="454" rx="118" ry="16" fill="#000000" opacity="0.22">
+    <animate attributeName="rx" values="118;96;118" keyTimes="0;0.5;1" dur="1.1s" repeatCount="indefinite"/>
+  </ellipse>
+
+  <!-- Personajul se lasa in jos (genuflexiune) cat impinge gantera in sus -->
+  <g>
+    <animateTransform attributeName="transform" type="translate"
+      values="0 0; 0 10; 0 0" keyTimes="0;0.5;1" dur="1.1s" repeatCount="indefinite"/>
+
+    <!-- Coaja avocado -->
+    <path d="M256 176 C212 176 186 224 186 280 C186 344 214 400 256 400 C298 400 326 344 326 280 C326 224 300 176 256 176 Z" fill="#3f6212"/>
+    <!-- Miezul (jumatate de avocado) -->
+    <path d="M256 194 C222 194 202 234 202 282 C202 336 224 386 256 386 C288 386 304 336 304 282 C304 234 290 194 256 194 Z" fill="#dcfce7"/>
+    <!-- Samburele -->
+    <circle cx="256" cy="300" r="44" fill="#b45309"/>
+    <circle cx="256" cy="300" r="30" fill="#d97706"/>
+
+    <!-- Fata -->
+    <circle cx="236" cy="266" r="7" fill="#1c1917"/>
+    <circle cx="276" cy="266" r="7" fill="#1c1917"/>
+    <path d="M240 286 Q256 300 272 286" fill="none" stroke="#1c1917" stroke-width="6" stroke-linecap="round"/>
+
+    <!-- Bratele + gantera impinse deasupra capului -->
+    <g>
+      <animateTransform attributeName="transform" type="translate"
+        values="0 0; 0 -18; 0 0" keyTimes="0;0.5;1" dur="1.1s" repeatCount="indefinite"/>
+
+      <path d="M214 214 C200 176 208 150 224 140" fill="none" stroke="#4d7c0f" stroke-width="18" stroke-linecap="round"/>
+      <path d="M298 214 C312 176 304 150 288 140" fill="none" stroke="#4d7c0f" stroke-width="18" stroke-linecap="round"/>
+      <circle cx="224" cy="140" r="13" fill="#65a30d"/>
+      <circle cx="288" cy="140" r="13" fill="#65a30d"/>
+
+      <rect x="176" y="128" width="160" height="14" rx="7" fill="#e2e8f0"/>
+      <rect x="166" y="110" width="18" height="50" rx="6" fill="#94a3b8"/>
+      <rect x="328" y="110" width="18" height="50" rx="6" fill="#94a3b8"/>
+      <rect x="190" y="116" width="12" height="38" rx="4" fill="#cbd5e1"/>
+      <rect x="310" y="116" width="12" height="38" rx="4" fill="#cbd5e1"/>
+    </g>
   </g>
 </svg>

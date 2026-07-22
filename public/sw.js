@@ -3,7 +3,7 @@
 // Simple offline-first service worker for Eat Track.
 // Static shell is cached; API calls always go to the network.
 
-const CACHE = "eattrack-v26";
+const CACHE = "eattrack-v29";
 const SHELL = [
   "./",
   "./index.html",

@@ -1,6 +1,6 @@
 {
-  "name": "Eat Track",
-  "short_name": "EatTrack",
+  "name": "Nutripal",
+  "short_name": "Nutripal",
   "description": "Jurnal personal de mese și greutate.",
   "start_url": "./index.html",
   "scope": "./",
