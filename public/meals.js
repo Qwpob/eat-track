@@ -228,9 +228,25 @@ function renderCalendar() {
     cell.addEventListener("click", () => {
       state.date = cell.dataset.date;
       $("#date-input").value = state.date;
-      loadDay();
+      openDay();
     });
   });
+}
+
+function openDay() {
+  const card = $("#meals-card");
+  if (card) {
+    card.hidden = false;
+    const title = $("#meals-title");
+    if (title) title.textContent = `🍽️ Mesele zilei — ${formatDayLabel(state.date)}`;
+    card.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+  loadDay();
+}
+
+function formatDayLabel(iso) {
+  const [y, m, d] = iso.split("-").map(Number);
+  return `${d} ${MONTH_NAMES[m - 1]} ${y}`;
 }
 
 function changeMonth(delta) {
@@ -657,6 +673,19 @@ async function init() {
   $("#meal-input").addEventListener("input", scheduleLivePreview);
   $("#cal-prev").addEventListener("click", () => changeMonth(-1));
   $("#cal-next").addEventListener("click", () => changeMonth(1));
+  const closeBtn = $("#meals-close");
+  if (closeBtn) closeBtn.addEventListener("click", () => ($("#meals-card").hidden = true));
+  const dateInput = $("#date-input");
+  if (dateInput) {
+    dateInput.addEventListener("change", () => {
+      const card = $("#meals-card");
+      if (card) {
+        card.hidden = false;
+        const title = $("#meals-title");
+        if (title) title.textContent = `🍽️ Mesele zilei — ${formatDayLabel(state.date)}`;
+      }
+    });
+  }
   if (cfg.vision) {
     $("#scan-card").hidden = false;
     $("#label-file").addEventListener("change", scanFile);

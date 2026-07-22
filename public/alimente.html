@@ -37,6 +37,11 @@
           recunoscut automat când scrii o masă (ex: „150g nume produs").
         </p>
         <div class="row">
+          <button type="button" id="food-scan" class="ghost">📷 Scanează codul de bare</button>
+          <button type="button" id="food-scan-stop" class="ghost" hidden>Oprește</button>
+        </div>
+        <video id="food-video" class="scanner-video" playsinline hidden></video>
+        <div class="row">
           <input
             id="food-code"
             type="text"

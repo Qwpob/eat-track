@@ -77,6 +77,86 @@ async function deleteFood(name) {
   renderFoods(res.foods || []);
 }
 
+// ---- Scanare cod de bare cu camera -----------------------------------
+let fdStream = null;
+let fdDetector = null;
+let fdRAF = null;
+
+function fdSupportsCamera() {
+  return (
+    "BarcodeDetector" in window &&
+    navigator.mediaDevices &&
+    typeof navigator.mediaDevices.getUserMedia === "function"
+  );
+}
+
+async function startFoodScan() {
+  const status = $("#food-lookup-status");
+  if (!fdSupportsCamera()) {
+    status.textContent = "Camera nu e disponibilă aici. Scrie codul manual mai jos.";
+    return;
+  }
+  try {
+    if (!fdDetector) {
+      fdDetector = new BarcodeDetector({
+        formats: ["ean_13", "ean_8", "upc_a", "upc_e", "code_128"],
+      });
+    }
+    fdStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: "environment" },
+    });
+    const video = $("#food-video");
+    video.srcObject = fdStream;
+    video.hidden = false;
+    $("#food-scan").hidden = true;
+    $("#food-scan-stop").hidden = false;
+    status.textContent = "Caut codul de bare…";
+    await video.play();
+    foodScanLoop();
+  } catch (e) {
+    status.textContent =
+      "Nu am putut porni camera. Verifică permisiunile sau scrie codul manual.";
+    stopFoodScan();
+  }
+}
+
+async function foodScanLoop() {
+  const video = $("#food-video");
+  if (!fdStream || !video || video.readyState < 2) {
+    fdRAF = requestAnimationFrame(foodScanLoop);
+    return;
+  }
+  try {
+    const codes = await fdDetector.detect(video);
+    if (codes && codes.length) {
+      const code = String(codes[0].rawValue || "").replace(/\D/g, "");
+      stopFoodScan();
+      $("#food-code").value = code;
+      await lookupFoodCode();
+      return;
+    }
+  } catch (e) {
+    // ignore per-frame decode errors and keep scanning
+  }
+  fdRAF = requestAnimationFrame(foodScanLoop);
+}
+
+function stopFoodScan() {
+  if (fdRAF) cancelAnimationFrame(fdRAF);
+  fdRAF = null;
+  if (fdStream) {
+    fdStream.getTracks().forEach((t) => t.stop());
+    fdStream = null;
+  }
+  const video = $("#food-video");
+  if (video) {
+    video.srcObject = null;
+    video.hidden = true;
+  }
+  $("#food-scan").hidden = false;
+  $("#food-scan-stop").hidden = true;
+}
+
 async function lookupFoodCode() {
   const status = $("#food-lookup-status");
   const code = $("#food-code").value.replace(/\D/g, "");
@@ -107,6 +187,9 @@ async function init() {
   await initCommon(loadFoods);
   $("#food-form").addEventListener("submit", saveFood);
   $("#food-lookup").addEventListener("click", lookupFoodCode);
+  $("#food-scan").addEventListener("click", startFoodScan);
+  $("#food-scan-stop").addEventListener("click", stopFoodScan);
+  if (!fdSupportsCamera()) $("#food-scan").hidden = true;
   $("#food-code").addEventListener("keydown", (e) => {
     if (e.key === "Enter") {
       e.preventDefault();

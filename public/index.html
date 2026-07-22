@@ -112,13 +112,6 @@
         </div>
       </section>
 
-      <!-- Mesele zilei -->
-      <section class="card">
-        <h2>🍽️ Mesele zilei</h2>
-        <p class="hint">Apasă pe o masă pentru a o edita.</p>
-        <div id="meals-list" class="meals"></div>
-      </section>
-
       <!-- Calendar -->
       <section class="card">
         <div class="card-head">
@@ -130,6 +123,16 @@
           </div>
         </div>
         <div id="calendar" class="calendar"></div>
+      </section>
+
+      <!-- Mesele zilei (afisate doar cand deschizi o zi din calendar) -->
+      <section class="card" id="meals-card" hidden>
+        <div class="card-head">
+          <h2 id="meals-title">🍽️ Mesele zilei</h2>
+          <button type="button" id="meals-close" class="ghost small">✕</button>
+        </div>
+        <p class="hint">Apasă pe o masă pentru a o edita.</p>
+        <div id="meals-list" class="meals"></div>
       </section>
     </main>
 
